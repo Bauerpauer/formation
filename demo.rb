@@ -1,6 +1,33 @@
 require 'rubygems'
 require 'sinatra'
+require 'datamapper'
 require File.expand_path('../lib/formation', __FILE__)
+
+class Post
+  
+  include DataMapper::Resource
+  
+  property :id, Serial
+  property :title, String
+  property :body, Text
+  property :created_at, DateTime
+  
+end
+
+class PostForm
+  
+  include Formation::Form
+  
+  resource :post
+  
+  field 'post[title]', :label => 'Title', :required => true
+  field 'post[body]', :label => 'Body', :required => true
+  
+  def initialize(post)
+    @post = post
+  end
+  
+end
 
 class RegistrationForm
   
@@ -18,6 +45,9 @@ class RegistrationForm
   
 end
 
+DataMapper.setup :default, 'sqlite::memory:'
+DataMapper.auto_migrate!
+
 get '/register' do
   @form = RegistrationForm.new
   erb :register
@@ -30,6 +60,22 @@ post '/register' do
     erb :thanks
   else
     erb :register
+  end
+end
+
+get '/posts/new' do
+  @form = PostForm.new(Post.new)
+  erb :new_post
+end
+
+post '/posts' do
+  @form = PostForm.new(Post.new)
+  @form.submit params
+  if @form.valid?
+    @form.post.save
+    redirect "/posts/#{@form.post.id}"
+  else
+    erb :new_post
   end
 end
 
@@ -66,3 +112,18 @@ __END__
 
 @@ thanks
 <h1>Thanks!</h1>
+
+@@ new_post
+<h1>New Post</h1>
+<form action="/posts" method="post">
+  <% @form.errors.each do |error| %>
+    <p style="color: red"><%= error %></p>
+  <% end %>
+  <% @form.elements.each do |element| %>
+    <% if element.is_a? Formation::Field %>
+      <label><%= element.label %></label>
+      <input type="text" name="<%= element.name %>" value="<%= @form.values[element.name] %>" />
+    <% end %>
+  <% end %>
+  <input type="submit" />
+</form>

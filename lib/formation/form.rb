@@ -8,6 +8,7 @@ module Formation::Form
     
     def field(name, options = {})
       @_current_fieldset ||= nil
+      name = name.to_s
       fields[name] = Formation::Field.new(name, { :fieldset => @_current_fieldset }.merge(options))
       elements << fields[name] unless @_current_fieldset
     end
@@ -26,7 +27,18 @@ module Formation::Form
     def fieldsets
       @fieldsets ||= {}
     end
-      
+    
+    def resource(resource)
+      resources << resource
+      class_eval <<-RUBY
+        attr_accessor :#{resource}
+      RUBY
+    end
+    
+    def resources
+      @resources ||= []
+    end
+    
   end
   
   def self.included(base)
@@ -45,8 +57,8 @@ module Formation::Form
   def submit(params)
     errors.clear
     self.class.fields.each do |name, field|
-      values[name] = extract_value_from_params(name, params)
-      if field.required? && (values[name].nil? || values[name].empty?)
+      value = extract_value_from_params(name, params)
+      if field.required? && (value.nil? || value.empty?)
         errors << "#{name} is required"
       end
     end
@@ -58,21 +70,31 @@ module Formation::Form
   end
   
   def values
-    @values ||= Hash.new
+    @values ||= {}
   end
   
   private
   
   def extract_value_from_params(name, params)
-    return params[name] if params[name]
     key = %r{([^\[\]=&]+)}.match(name).captures.first
-    if params.has_key?(key)
-      branch = params[key].dup
-      %r{\[([^\[\]=&]+)\]}.match(name).captures.each do |capture|
-        branch = branch[capture]
+    value = if self.class.resources.include? key.to_sym
+      captures = %r{\[([^\[\]=&]+)\]}.match(name).captures
+      send(key).send("#{captures.first}=", params.send('fetch', key).send('fetch', captures.first))
+    else
+      if params[key]
+        branch = params[key].dup
+        match = %r{\[([^\[\]=&]+)\]}.match(name)
+        if match
+          match.captures.each do |capture|
+            branch = branch[capture]
+          end
+        end
+        branch
+      else
+        nil
       end
-      branch
     end
+    values[name] = value
   end
   
 end

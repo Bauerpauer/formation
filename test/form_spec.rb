@@ -16,6 +16,20 @@ class ::TestForm
   end
 end
 
+class ::ResourceBasedTestForm
+  
+  include Formation::Form
+  
+  resource :post
+  
+  field 'post[title]'
+  
+  def initialize(post)
+    @post = post
+  end
+  
+end
+
 describe Formation::Form do
   
   describe '#fields' do
@@ -42,13 +56,15 @@ describe Formation::Form do
     
     before do
       @user = OpenStruct.new(:first_name => 'Chris')
-      @form = TestForm.new(@user)
+      @simple_form = TestForm.new(@user)
+      @post = OpenStruct.new(:title => 'Test')
+      @model_form = ResourceBasedTestForm.new(@post)
     end
     
     describe '.elements' do
       
       it 'should return the elements in the correct order' do
-        @form.elements.map(&:name).must_equal %w{ user[first_name] Address }
+        @simple_form.elements.map(&:name).must_equal %w{ user[first_name] Address }
       end
       
     end
@@ -56,27 +72,30 @@ describe Formation::Form do
     describe '.submit' do
     
       it 'should accept empty params' do
-        @form.submit({})
+        @simple_form.submit({})
       end
       
       it 'should extract values of fields' do
-        @form.submit({'user' => { 'first_name' => 'Christopher' } })
-        @form.values['user[first_name]'].must_equal 'Christopher'
+        @simple_form.submit({'user' => { 'first_name' => 'Christopher' } })
+        @simple_form.values['user[first_name]'].must_equal 'Christopher'
+        
+        @model_form.submit({'post' => { 'title' => 'Testing' }})
+        @model_form.post.title.must_equal 'Testing'
       end
       
       it 'should be valid if all required values were provided' do
-        @form.submit({'user' => { 'first_name' => 'Christopher' } })
-        @form.valid?.must_equal true
+        @simple_form.submit({'user' => { 'first_name' => 'Christopher' } })
+        @simple_form.valid?.must_equal true
       end
       
       it 'should not be valid if all required values were not provided' do
-        @form.submit({})
-        @form.valid?.must_equal false
+        @simple_form.submit({})
+        @simple_form.valid?.must_equal false
       end
     
       it 'should have an error for each missing required value' do
-        @form.submit({})
-        @form.errors.must_equal ['user[first_name] is required']
+        @simple_form.submit({})
+        @simple_form.errors.must_equal ['user[first_name] is required']
       end
     
     end
@@ -84,7 +103,7 @@ describe Formation::Form do
     describe '.values' do
       
       it 'should extract values from resource' do
-        @form.values['user[first_name]'].must_equal 'Chris'
+        @simple_form.values['user[first_name]'].must_equal 'Chris'
       end
       
     end
