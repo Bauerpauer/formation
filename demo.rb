@@ -18,10 +18,10 @@ class PostForm
   
   include Formation::Form
   
-  resource :post
-  
-  field 'post[title]', :label => 'Title', :required => true
-  field 'post[body]', :label => 'Body', :required => true
+  resource :post do
+    field :title, :label => 'Title', :required => true
+    field :body, :label => 'Body', :required => true
+  end
   
   def initialize(post)
     @post = post

@@ -7,8 +7,13 @@ module Formation::Form
     end
     
     def field(name, options = {})
+      @_current_resource ||= nil
       @_current_fieldset ||= nil
-      name = name.to_s
+      if @_current_resource
+        name = "#{@_current_resource}[#{name}]"
+      else
+        name = name.to_s
+      end
       fields[name] = Formation::Field.new(name, { :fieldset => @_current_fieldset }.merge(options))
       elements << fields[name] unless @_current_fieldset
     end
@@ -33,6 +38,11 @@ module Formation::Form
       class_eval <<-RUBY
         attr_accessor :#{resource}
       RUBY
+      if block_given?
+        @_current_resource = resource
+        yield
+        @_current_resource = nil
+      end
     end
     
     def resources

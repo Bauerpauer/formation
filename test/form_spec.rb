@@ -20,9 +20,9 @@ class ::ResourceBasedTestForm
   
   include Formation::Form
   
-  resource :post
-  
-  field 'post[title]'
+  resource :post do
+    field :title
+  end
   
   def initialize(post)
     @post = post
