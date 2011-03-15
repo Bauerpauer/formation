@@ -19,8 +19,10 @@ class PostForm
   include Formation::Form
   
   resource :post do
-    field :title, :label => 'Title', :required => true
-    field :body, :label => 'Body', :required => true
+    fieldset :legend => 'New Post' do
+      field :title, :label => 'Title', :required => true
+      field :body, :label => 'Body', :required => true
+    end
   end
   
   def initialize(post)
@@ -48,6 +50,73 @@ end
 DataMapper.setup :default, 'sqlite::memory:'
 DataMapper.auto_migrate!
 
+get '/styles.css' do
+  <<-CSS
+    *, html {
+      font-family: Verdana, Arial, Helvetica, sans-serif;
+    }
+    body, form, ul, li, p, h2, h3, h4, h5 {
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #606061;
+      color: #ffffff;
+    }
+    img {
+      border: none;
+    }
+    p {
+      font-size: 1em;
+      margin: 0 0 1em 0;
+    }
+    h2 {
+      font-size: 14px;
+      margin: 0 0 12px;
+    }
+    
+    form {
+      margin: 20px auto;
+      width: 610px;
+    }
+    form fieldset {
+      margin: 0 0 20px;
+      padding: 20px;
+      -webkit-border-radius: 5px;
+      -moz-border-radius: 5px;
+      border-radius: 5px;
+    }
+    form ol {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+    form li {
+      margin: 0 0 12px;
+      position: relative;
+    }
+    form label {
+      width: 150px;
+      display: inline-block;
+      vertical-align: top;
+    }
+    form input, form textarea, form select {
+      background: #fff;
+      display: inline-block;
+      width: 371px;
+      border: 1px solid #fff;
+      padding: 3px 26px 3px 3px;
+      -moz-transition: background-color 1s ease;
+      -webkit-transition: background-color 1s ease;
+      -o-transition: background-color 1s ease;
+      transition: background-color 1s ease;
+      -webkit-border-radius: 5px;
+      -moz-border-radius: 5px;
+      border-radius: 5px;
+    }
+  CSS
+end
+
 get '/register' do
   @form = RegistrationForm.new
   erb :register
@@ -73,6 +142,7 @@ post '/posts' do
   @form.submit params
   if @form.valid?
     @form.post.save
+    raise @form.inspect
     redirect "/posts/#{@form.post.id}"
   else
     erb :new_post
@@ -83,7 +153,9 @@ __END__
 
 @@ layout
 <html>
-  <head></head>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/styles.css" media="screen" />
+  </head>
   <body>
     <%= yield %>
   </body>
@@ -92,21 +164,7 @@ __END__
 @@ register
 <h1>Register</h1>
 <form action="/register" method="post">
-  <% @form.errors.each do |error| %>
-    <p style="color: red"><%= error %></p>
-  <% end %>
-  <% @form.elements.each do |element| %>
-    <% if element.is_a? Formation::Fieldset %>
-      <fieldset>
-        <legend><%= element.legend %></legend>
-        <% element.fields.each do |field| %>
-          <label><%= field.label %></label>
-          <input type="text" name="<%= field.name %>" value="<%= @form.values[field.name] %>" />
-          <br />
-        <% end %>
-      </fieldset>
-    <% end %>
-  <% end %>
+  <%= Formation::Printer.new().print(@form) %>
   <input type="submit" />
 </form>
 
@@ -116,14 +174,6 @@ __END__
 @@ new_post
 <h1>New Post</h1>
 <form action="/posts" method="post">
-  <% @form.errors.each do |error| %>
-    <p style="color: red"><%= error %></p>
-  <% end %>
-  <% @form.elements.each do |element| %>
-    <% if element.is_a? Formation::Field %>
-      <label><%= element.label %></label>
-      <input type="text" name="<%= element.name %>" value="<%= @form.values[element.name] %>" />
-    <% end %>
-  <% end %>
+  <%= Formation::Printer.new().print(@form) %>
   <input type="submit" />
 </form>

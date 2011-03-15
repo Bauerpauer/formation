@@ -4,7 +4,7 @@ class Formation::Fieldset
   
   def initialize(name, options = {})
     @name = name
-    @legend = options[:legend] || name
+    @legend = options[:legend] || Formation::Util.titleize(name)
   end
   
   def fields

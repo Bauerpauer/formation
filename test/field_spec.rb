@@ -5,11 +5,11 @@ describe Formation::Field do
   describe '.label' do
     
     it 'should use the given label, if specified' do
-      Formation::Field.new('user[first_name]', :label => 'First Name').label.must_equal 'First Name'
+      Formation::Field.new('first_name', :label => 'Name').label.must_equal 'Name'
     end
     
-    it 'should use the name, if not specified' do
-      Formation::Field.new('user[first_name]').label.must_equal 'user[first_name]'
+    it 'should use the titleized name, if not specified' do
+      Formation::Field.new('first_name').label.must_equal 'First Name'
     end
     
   end

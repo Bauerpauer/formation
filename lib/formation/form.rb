@@ -22,8 +22,12 @@ module Formation::Form
       @fields ||= {}
     end
     
-    def fieldset(legend)
-      @_current_fieldset = (fieldsets[legend] ||= Formation::Fieldset.new(legend))
+    def fieldset(name, options = {})
+      if name.is_a? Hash
+        options = name
+        name = Formation::Util.underscore(options[:legend])
+      end
+      @_current_fieldset = (fieldsets[name] ||= Formation::Fieldset.new(name, options))
       elements << @_current_fieldset
       yield
       @_current_fieldset = nil
@@ -56,7 +60,6 @@ module Formation::Form
   end
   
   def elements
-    # TODO: Return elements but w/ values
     self.class.elements
   end
   
@@ -64,12 +67,24 @@ module Formation::Form
     @errors ||= []
   end
   
+  def fields
+    fields = elements.map do |element|
+      case element
+      when Formation::Fieldset
+        element.fields
+      when Formation::Field
+        element
+      end
+    end
+    fields.flatten
+  end
+  
   def submit(params)
     errors.clear
-    self.class.fields.each do |name, field|
-      value = extract_value_from_params(name, params)
-      if field.required? && (value.nil? || value.empty?)
-        errors << "#{name} is required"
+    fields.each do |field|
+      field.value = extract_value_from_params(field.name, params)
+      if field.required? && (field.value.nil? || field.value.empty?)
+        errors << "#{field.label} is required"
       end
     end
     valid?
