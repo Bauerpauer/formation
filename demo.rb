@@ -164,7 +164,7 @@ __END__
 @@ register
 <h1>Register</h1>
 <form action="/register" method="post">
-  <%= Formation::Printer.new().print(@form) %>
+  <%= Formation::Printer.new(@form).print %>
   <input type="submit" />
 </form>
 
@@ -174,6 +174,6 @@ __END__
 @@ new_post
 <h1>New Post</h1>
 <form action="/posts" method="post">
-  <%= Formation::Printer.new().print(@form) %>
+  <%= Formation::Printer.new(@form).print %>
   <input type="submit" />
 </form>

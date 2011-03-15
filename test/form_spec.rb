@@ -11,7 +11,7 @@ class ::TestForm
   end
   
   fieldset :legend => 'Login Details' do
-    field 'username'
+    field 'username', :custom => 'test'
   end
   
   def initialize(user)
@@ -46,6 +46,10 @@ describe Formation::Form do
     
     it 'should have the label of the fieldset it belongs to (if any)' do
       TestForm.fields['address'].fieldset.legend.must_equal 'Address'
+    end
+    
+    it 'should pass-through custom attributes' do
+      TestForm.fields['username'].custom.must_equal 'test'
     end
     
   end

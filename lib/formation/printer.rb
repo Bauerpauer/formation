@@ -1,6 +1,12 @@
 class Formation::Printer
   
-  def print(form)
+  attr_reader :form
+  
+  def initialize(form)
+    @form = form
+  end
+  
+  def print
     html = ''
     html << print_errors(form.errors)
     form.elements.each do |element|
