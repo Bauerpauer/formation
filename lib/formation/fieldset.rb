@@ -1,6 +1,6 @@
-class Formation::Fieldset
+class Formation::Fieldset < Formation::Element
   
-  attr_reader :name, :legend
+  attr_reader :legend
   
   def initialize(name, options = {})
     @name = name

@@ -69,12 +69,7 @@ module Formation::Form
   
   def fields
     fields = elements.map do |element|
-      case element
-      when Formation::Fieldset
-        element.fields
-      when Formation::Field
-        element
-      end
+      element.field? ? element : element.fields
     end
     fields.flatten
   end

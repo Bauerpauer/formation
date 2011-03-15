@@ -1,7 +1,6 @@
-class Formation::Field
+class Formation::Field < Formation::Element
   
-  attr_reader :name, :label
-  attr_reader :fieldset
+  attr_reader :label, :fieldset
   attr_accessor :value
   
   def initialize(name, options = {})
@@ -11,6 +10,10 @@ class Formation::Field
     end
     @label = options[:label] || Formation::Util.titleize(@name)
     @required = options[:required] || false
+  end
+  
+  def field?
+    true
   end
   
   def required?

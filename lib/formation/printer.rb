@@ -3,13 +3,11 @@ class Formation::Printer
   def print(form)
     html = ''
     html << print_errors(form.errors)
-    #raise form.elements.inspect
     form.elements.each do |element|
-      case element
-      when Formation::Fieldset
-        html << print_fieldset(element)
-      when Formation::Field
+      if element.field?
         html << print_field(element)
+      else
+        html << print_fieldset(element)
       end
     end
     html
