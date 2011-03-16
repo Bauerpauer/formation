@@ -33,7 +33,7 @@ class Formation::Printer
     <<-HTML
       <li>
         <label>#{field.label}</label>
-        <input type="text" name="#{field.name}" value="#{field.value}">
+        #{field.type.to_html}
       </li>
     HTML
   end

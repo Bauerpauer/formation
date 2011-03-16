@@ -10,13 +10,13 @@ Simple:
       include Formation::Form
 
       fieldset :account do
-        field :login_name, :required => true
-        field :password, :required => true
+        field :login_name, :type => :text, :required => true
+        field :password, :type => :text, :required => true
       end
 
       fieldset :address do
-        field :address
-        field :city
+        field :address, :type => :text
+        field :city, :type => :text
       end
 
     end
@@ -40,8 +40,8 @@ Model:
 
       resource :post do
         fieldset :legend => 'New Post' do
-          field :title, :label => 'Title', :required => true
-          field :body, :label => 'Body', :required => true
+          field :title, :type => :text, :required => true
+          field :body, :type => :textarea, :required => true
         end
       end
 

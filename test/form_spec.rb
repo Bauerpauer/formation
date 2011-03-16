@@ -1,55 +1,19 @@
 require File.expand_path('../test_helper', __FILE__)
 
-class ::TestForm
-  include Formation::Form
-  
-  field 'first_name', :required => true
-  
-  fieldset 'Address' do
-    field 'address'
-    field 'city'
-  end
-  
-  fieldset :legend => 'Login Details' do
-    field 'username', :custom => 'test'
-  end
-  
-  def initialize(user)
-    @user = user
-    values['first_name'] = user.first_name
-  end
-end
-
-class ::ResourceBasedTestForm
-  
-  include Formation::Form
-  
-  resource :post do
-    field :title
-  end
-  
-  field 'author[name]'
-  
-  def initialize(post)
-    @post = post
-  end
-  
-end
-
 describe Formation::Form do
   
   describe '#fields' do
     
     it 'should have the correct name' do
-      TestForm.fields['first_name'].name.must_equal 'first_name'
+      SimpleForm.fields['first_name'].name.must_equal 'first_name'
     end
     
     it 'should have the label of the fieldset it belongs to (if any)' do
-      TestForm.fields['address'].fieldset.legend.must_equal 'Address'
+      SimpleForm.fields['address'].fieldset.legend.must_equal 'Address'
     end
     
     it 'should pass-through custom attributes' do
-      TestForm.fields['username'].custom.must_equal 'test'
+      SimpleForm.fields['username'].custom.must_equal 'test'
     end
     
   end
@@ -57,7 +21,7 @@ describe Formation::Form do
   describe '#fieldsets' do
     
     it 'should contain the fields belonging to it' do
-      TestForm.fieldsets['Address'].fields.map(&:name).must_equal %w{ address city }    
+      SimpleForm.fieldsets['Address'].fields.map(&:name).must_equal %w{ address city }    
     end
   
   end
@@ -65,10 +29,9 @@ describe Formation::Form do
   describe 'an instance' do
     
     before do
-      @user = OpenStruct.new(:first_name => 'Chris')
-      @simple_form = TestForm.new(@user)
+      @simple_form = SimpleForm.new(:first_name => 'Chris')
       @post = OpenStruct.new(:title => 'Test')
-      @model_form = ResourceBasedTestForm.new(@post)
+      @model_form = PostForm.new(@post)
     end
     
     describe '.elements' do

@@ -99,7 +99,12 @@ module Formation::Form
     key = %r{([^\[\]=&]+)}.match(name).captures.first
     value = if self.class.resources.include? key.to_sym
       captures = %r{\[([^\[\]=&]+)\]}.match(name).captures
-      send(key).send("#{captures.first}=", params.send('fetch', key).send('fetch', captures.first))
+      return nil unless captures.any?
+      resource = params.fetch(key, nil)
+      return nil unless resource
+      actual_value = resource.fetch(captures.first, nil)
+      return nil unless actual_value
+      send(key).send("#{captures.first}=", actual_value)
     else
       if params[key]
         branch = params[key].dup

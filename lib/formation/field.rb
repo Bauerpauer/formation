@@ -1,6 +1,6 @@
 class Formation::Field < Formation::Element
   
-  attr_reader :label, :fieldset
+  attr_reader :label, :fieldset, :type
   attr_accessor :value
   
   def initialize(name, options = {})
@@ -8,6 +8,8 @@ class Formation::Field < Formation::Element
     if @fieldset = options.delete(:fieldset)
       @fieldset.fields << self
     end
+    @type = options.delete(:type) || :text
+    @type = Formation::Type.create(self, @type)
     @label = options.delete(:label) || Formation::Util.titleize(@name)
     @required = options.delete(:required) || false
     

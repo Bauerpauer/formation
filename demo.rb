@@ -21,7 +21,7 @@ class PostForm
   resource :post do
     fieldset :legend => 'New Post' do
       field :title, :label => 'Title', :required => true
-      field :body, :label => 'Body', :required => true
+      field :body, :label => 'Body', :type => :textarea, :required => true
     end
   end
   
